@@ -8,9 +8,9 @@ class Player {
     this.color = "blue";
     this.velocityX = 0;
     this.velocityY = 0;
-    this.gravity = 0.4;
+    this.gravity = 0.3;
     this.isJumping = false;
-    this.speed = 5;
+    this.speed = 2.5;
     this.coins = 0;
     this.deathCount = 0;
     this.startX = x;
@@ -22,26 +22,45 @@ class Player {
     this.startY = y;
     this.spawnX = x;
     this.spawnY = y;
+
+    this.spriteSheet = new Image();
+    this.spriteSheet.src = 'chemin/vers/votre/spritesheet.png';
+    
+    // Initialiser le gestionnaire d'animations
+    this.animationManager = new SpriteAnimationManager(this.spriteSheet, {
+        frameWidth: 32,  // Ajustez selon la taille de vos sprites
+        frameHeight: 32, // Ajustez selon la taille de vos sprites
+        idleFrames: 4,   // Nombre de frames pour l'animation idle
+        walkFrames: 6,   // Nombre de frames pour l'animation de marche
+        jumpFrames: 2,   // Nombre de frames pour l'animation de saut
+        idleRow: 0,      // Ligne pour l'animation idle dans le spritesheet
+        walkRow: 1,      // Ligne pour l'animation de marche
+        jumpRow: 2,      // Ligne pour l'animation de saut
+        idleSpeed: 200,  // Vitesse de l'animation idle
+        walkSpeed: 100,  // Vitesse de l'animation de marche
+        jumpSpeed: 150   // Vitesse de l'animation de saut
+    });
+
   }
 
-  update(platforms, doors) {
+  update(platforms, doors, timestamp) {
     // Ajouter doors comme paramètre
     this.velocityY += this.gravity;
-
+  
     const oldX = this.x;
     const oldY = this.y;
-
+  
     let newY = this.y + this.velocityY;
     let newX = this.x + this.velocityX;
-
+  
     let isOnGround = false;
-
+  
     // Vérifier les collisions avec les plateformes
     for (let platform of platforms) {
       if (platform instanceof DisappearingPlatform && !platform.isVisible) {
         continue;
       }
-
+  
       if (this.checkCollision(newX, this.y, platform)) {
         if (this.velocityX > 0) {
           newX = platform.x - this.width;
@@ -50,14 +69,14 @@ class Player {
         }
         this.velocityX = 0;
       }
-
+  
       if (this.checkCollision(newX, newY, platform)) {
         if (oldY + this.height <= platform.y) {
           newY = platform.y - this.height;
           this.velocityY = 0;
           isOnGround = true;
           this.isJumping = false;
-
+  
           if (platform instanceof DisappearingPlatform) {
             platform.handleCollision(this);
             if (!platform.isVisible) {
@@ -72,7 +91,7 @@ class Player {
         }
       }
     }
-
+  
     // Vérifier les collisions avec les portes fermées
     for (let door of doors) {
       if (!door.isOpen) {
@@ -85,7 +104,7 @@ class Player {
           }
           this.velocityX = 0;
         }
-
+  
         if (this.checkCollision(newX, newY, door)) {
           if (oldY + this.height <= door.y) {
             newY = door.y - this.height;
@@ -99,10 +118,25 @@ class Player {
         }
       }
     }
-
+  
     this.x = newX;
     this.y = newY;
+    
+    if (this.isJumping) {
+      this.animationManager.setAnimation('jump', this.velocityX >= 0);
+    } else if (Math.abs(this.velocityX) > 0) {
+      this.animationManager.setAnimation('walk', this.velocityX >= 0);
+    } else {
+      this.animationManager.setAnimation('idle', this.animationManager.facingRight);
+    }
+  
+    this.animationManager.update(timestamp);
+  } // Fin de la méthode update
+  
+  draw(ctx) {
+    this.animationManager.draw(ctx, this.x, this.y, this.width, this.height);
   }
+  
 
   // Ajouter une méthode helper pour vérifier les collisions
   checkCollision(x, y, platform) {
@@ -176,74 +210,76 @@ class Player {
     this.spawnY = y;
   }
 }
-
-class AnimationManager {
-  constructor(playerElement, totalFrames) {
-    this.playerElement = playerElement;
-    this.totalFrames = totalFrames;
-    this.currentFrame = 0;
-    this.isJumping = false;
-    this.isWalking = false;
-    this.isIdle = true;
+class SpriteAnimationManager {
+  constructor(spriteSheet, options) {
+      this.spriteSheet = spriteSheet;
+      this.frameWidth = options.frameWidth;
+      this.frameHeight = options.frameHeight;
+      this.animations = {
+          idle: {
+              frames: options.idleFrames || 1,
+              row: options.idleRow || 0,
+              speed: options.idleSpeed || 100
+          },
+          walk: {
+              frames: options.walkFrames || 1,
+              row: options.walkRow || 0,
+              speed: options.walkSpeed || 100
+          },
+          jump: {
+              frames: options.jumpFrames || 1,
+              row: options.jumpRow || 0,
+              speed: options.jumpSpeed || 100
+          }
+      };
+      
+      this.currentAnimation = 'idle';
+      this.currentFrame = 0;
+      this.lastFrameTime = 0;
+      this.facingRight = true;
   }
 
-  updateAnimation() {
-    if (this.isIdle) {
-      this.playerElement.style.backgroundPosition = "0 0";
-    } else if (this.isWalking) {
-      let frameX = this.currentFrame * -50;
-      this.playerElement.style.backgroundPosition = `${frameX}px 0`;
-      this.currentFrame = (this.currentFrame + 1) % this.totalFrames;
-    } else if (this.isJumping) {
-      this.playerElement.style.backgroundPosition = `-${
-        this.currentFrame * 50
-      }px -50px`;
-      this.currentFrame = (this.currentFrame + 1) % 3;
-    }
+  update(timestamp) {
+      const animation = this.animations[this.currentAnimation];
+      if (!this.lastFrameTime) this.lastFrameTime = timestamp;
+
+      const deltaTime = timestamp - this.lastFrameTime;
+      if (deltaTime >= animation.speed) {
+          this.currentFrame = (this.currentFrame + 1) % animation.frames;
+          this.lastFrameTime = timestamp;
+      }
   }
 
-  startWalking() {
-    this.isWalking = true;
-    this.isIdle = false;
-    this.isJumping = false;
+  draw(ctx, x, y, width, height) {
+      const animation = this.animations[this.currentAnimation];
+      
+      ctx.save();
+      if (!this.facingRight) {
+          ctx.translate(x + width, y);
+          ctx.scale(-1, 1);
+          x = 0;
+      }
+
+      ctx.drawImage(
+          this.spriteSheet,
+          this.currentFrame * this.frameWidth,
+          animation.row * this.frameHeight,
+          this.frameWidth,
+          this.frameHeight,
+          x,
+          y,
+          width,
+          height
+      );
+      ctx.restore();
   }
 
-  startJumping() {
-    this.isJumping = true;
-    this.isWalking = false;
-    this.isIdle = false;
-    this.currentFrame = 0;
-  }
-
-  stopWalking() {
-    this.isWalking = false;
-    this.isIdle = true;
+  setAnimation(animationName, faceRight = true) {
+      if (this.currentAnimation !== animationName) {
+          this.currentAnimation = animationName;
+          this.currentFrame = 0;
+          this.lastFrameTime = 0;
+      }
+      this.facingRight = faceRight;
   }
 }
-
-// Initialisation
-let playerElement = document.getElementById("player");
-let animationManager = new AnimationManager(playerElement, 4);
-
-function gameLoop() {
-  animationManager.updateAnimation();
-  requestAnimationFrame(gameLoop);
-}
-
-gameLoop();
-
-// Gestion des événements de clavier
-document.addEventListener("keydown", (event) => {
-  if (event.key === "ArrowRight") {
-    animationManager.startWalking();
-  }
-  if (event.key === " ") {
-    animationManager.startJumping();
-  }
-});
-
-document.addEventListener("keyup", (event) => {
-  if (event.key === "ArrowRight") {
-    animationManager.stopWalking();
-  }
-});

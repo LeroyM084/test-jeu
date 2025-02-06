@@ -13,6 +13,7 @@ window.onload = function () {
       // 2. Game elements initialization
       const platforms = createPlatforms(canvas);
       const player = new Player(20, canvas.height - 20 - 50);
+      player.spriteSheet.src = '../assets/sprite_perso/penguin_walk04@2x.png';
       let coins = createCoins(canvas);
       let clée = createClées(canvas);
       let enemies = createEnemies(canvas);
@@ -167,7 +168,7 @@ window.onload = function () {
           });
       }
 
-      function gameLoop() {
+      function gameLoop(timestamp) {
           ctx.clearRect(0, 0, canvas.width, canvas.height);
 
           if (!isGameWon) {
@@ -201,7 +202,7 @@ window.onload = function () {
 
           if (!isGameWon) {
               updatePlayerMovement();
-              player.update(platforms, doors);
+              player.update(platforms, doors, timestamp);
               moveAllEnemies();
 
               if (victoryZone.checkVictory(player)) {
@@ -259,6 +260,7 @@ window.onload = function () {
       });
 
       gameLoop();
+      requestAnimationFrame(gameLoop);
   } else {
       console.error("Background music not found");
   }
