@@ -268,6 +268,8 @@ function createEnemies(canvas) {
       2.5
     )
   );
+  //enemie en dessus des plaforme pour que tu meurs si tu tombe dans le vide
+  enemies.push( new Enemy( -50, height  ,10000 , 0) );
 
   // Demi-scies horizontales
   enemies.push(new HalfRoundEnemy(1800, 270, 60, "../assets/sprite/scie.png", 4, 1700, 3000));

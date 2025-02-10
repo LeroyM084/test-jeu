@@ -1,6 +1,6 @@
 class Player {
   constructor(x, y) {
-    this.x = x;  // Position initiale du joueur
+    this.x = x; // Position initiale du joueur
     this.y = y;
     this.width = 40;
     this.height = 50;
@@ -132,7 +132,7 @@ class Player {
     this.coins++;
   }
 
-  collectClé() {
+  collectclée() {
     this.clées++;
   }
 
@@ -148,7 +148,10 @@ class Player {
     if (triggerZones) {
       triggerZones.forEach((zone) => {
         zone.reset();
-        if (zone.enemy instanceof TriggerEnemy || zone.enemy instanceof SpikeEnemy) {
+        if (
+          zone.enemy instanceof TriggerEnemy ||
+          zone.enemy instanceof SpikeEnemy
+        ) {
           const index = enemies.indexOf(zone.enemy);
           if (index > -1) {
             enemies.splice(index, 1);
@@ -175,24 +178,19 @@ class AnimationManager {
   }
 
   updateAnimation() {
-    if (this.playerElement) { // Vérifie si l'élément existe
-      if (this.isIdle) {
-        this.playerElement.style.backgroundPosition = "0 0";
-      } else if (this.isWalking) {
-        let frameX = this.currentFrame * -50;
-        this.playerElement.style.backgroundPosition = `${frameX}px 0`;
-        this.currentFrame = (this.currentFrame + 1) % this.totalFrames;
-      } else if (this.isJumping) {
-        this.playerElement.style.backgroundPosition = `-${
-          this.currentFrame * 50
-        }px -50px`;
-        this.currentFrame = (this.currentFrame + 1) % 3;
-      }
-    } else {
-      console.error("❌ Élément 'player' introuvable.");
+    if (this.isIdle) {
+      this.playerElement.style.backgroundPosition = "0 0";
+    } else if (this.isWalking) {
+      let frameX = this.currentFrame * -50;
+      this.playerElement.style.backgroundPosition = `${frameX}px 0`;
+      this.currentFrame = (this.currentFrame + 1) % this.totalFrames;
+    } else if (this.isJumping) {
+      this.playerElement.style.backgroundPosition = `-${
+        this.currentFrame * 50
+      }px -50px`;
+      this.currentFrame = (this.currentFrame + 1) % 3;
     }
   }
-  
 
   startWalking() {
     this.isWalking = true;
@@ -212,13 +210,12 @@ class AnimationManager {
     this.isIdle = true;
   }
 }
-
+/*
 // Initialisation
 let playerElement = document.getElementById("player");
-let animationManager = new AnimationManager(playerElement, 4);
 
 // Création de l'instance de player
-const player = new Player(20, 500);  // Position initiale du joueur
+const player = new Player(20, 500); // Position initiale du joueur
 
 
 gameLoop();
@@ -241,3 +238,4 @@ document.addEventListener("keyup", (event) => {
     player.stop();
   }
 });
+*/
