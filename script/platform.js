@@ -198,12 +198,14 @@ function createPlatforms(canvas) {
         new Platform(1620, canvas.height - 180, 40, 10, "ice_block"),
         new Platform(1700, canvas.height - 260, 40, 10, "ice_block"),
         new Platform(1620, canvas.height - 340, 40, 10, "ice_block"),
+        new Platform(1620, canvas.height - 730, 1930, 80, "ice_cliff"),
+        new Platform(2220, canvas.height - 500, 4, 4, "ice_block"),
     ];
 }
 
 function createDoors(canvas) {
     return [
         new Door(1450, canvas.height - 100),
-        new Door(3500, canvas.height - 480, 50),
+        new Door(3500, canvas.height - 650, 50, 250),
     ];
 }

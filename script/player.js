@@ -220,11 +220,6 @@ let animationManager = new AnimationManager(playerElement, 4);
 // Création de l'instance de player
 const player = new Player(20, 500);  // Position initiale du joueur
 
-// Fonction de mise à jour du jeu
-function gameLoop() {
-  player.update(platforms, doors);
-  requestAnimationFrame(gameLoop);
-}
 
 gameLoop();
 

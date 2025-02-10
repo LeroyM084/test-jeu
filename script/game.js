@@ -109,7 +109,7 @@ window.onload = function () {
                     player.y < clée.y + clée.radius &&
                     player.y + player.height > clée.y - clée.radius
                 ) {
-                    player.collectclée();
+                    player.collectClé();
                     return false;   
                 }
                 return true;
@@ -162,7 +162,7 @@ window.onload = function () {
         function moveAllEnemies() {
             enemies.forEach(enemy => {
                 if (enemy instanceof MovingEnemy) {
-                    enemy.movE();
+                    enemy.move();
                 } else if (enemy instanceof RoundEnemy) {
                     enemy.update();
                 }
